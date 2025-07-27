@@ -16,10 +16,11 @@ export default function App() {
     setMessages((prev) => [...prev, ["Human", formData.prompt]]);
     reset();
     try {
-      // const aiMessage = await axios.get("http://127.0.0.1:5000/chatbot", {
-      //   params: { prompt: formData.prompt },
-      // });
-      setMessages((prev) => [...prev, ["AI", "Hi I am AI"]]);
+      const aiMessage = await axios.get("http://127.0.0.1:5000/chatbot", {
+        params: { prompt: formData.prompt },
+        withCredentials: true,
+      });
+      setMessages((prev) => [...prev, ["AI", aiMessage.data]]);
     } catch (e) {
       console.log(e);
     }
