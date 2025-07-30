@@ -14,7 +14,7 @@ export default function Messages({ messages }) {
 
   return (
     <ul className="space-y-4">
-      {messages.map(([role, text], idx) => (
+      {messages.map(({ role, text, file }, idx) => (
         <li
           key={idx}
           className={`flex ${
@@ -37,10 +37,14 @@ export default function Messages({ messages }) {
           </span>
           <div className={`ml-2 mr-2 px-4 py-2 rounded-lg shadow bg-gray-700`}>
             {role === "Human" && <p className="break-words my-2">{text}</p>}
+            {role === "Human" && file && (
+              <div className="my-4 flex justify-end">
+                <i className="bi bi-file-earmark-text text-gray-400"></i>
+                <span className="truncate text-gray-300">{file.name}</span>
+              </div>
+            )}
             {role === "AI" && (
-              // <div className="prose prose-blue dark:prose:invert max-w-none">
               <ReactMarkdown
-                // className="prose prose-blue dark:prose-invert max-w-none"
                 components={{
                   code({ node, inline, className, children, ...props }) {
                     const match = /language-(\w+)/.exec(className || "");
@@ -91,7 +95,6 @@ export default function Messages({ messages }) {
               >
                 {text}
               </ReactMarkdown>
-              // </div>
             )}
           </div>
         </li>
