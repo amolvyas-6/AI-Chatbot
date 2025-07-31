@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
-from graph import agent, State
+from graph import agent, State, embed_resume_as_vectors
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 from werkzeug.utils import secure_filename
 import os
@@ -55,17 +55,17 @@ def get_response():
         filename = secure_filename(resume.filename)
         save_path = os.path.join(upload_dir, filename)
         resume.save(save_path)
-        prompt += f"Path to resume: {save_path}"
-    
-    if "conversation_id" not in session:
-        session["conversation_id"] = uuid.uuid4()
+        session["resume"] = save_path
+        prompt += f"\n\nThe path to resume: {save_path}"
 
+
+    if "conversation_id" not in session:
+        session["conversation_id"] = str(uuid.uuid4())
+    
+    prompt += f"\n\nConversation ID: {session['conversation_id']}"
     config = {"configurable": {"thread_id": str(session["conversation_id"])}}
     finalState = agent.invoke({"messages": [HumanMessage(content=prompt)]}, config=config)
     responseContent = finalState["messages"][-1].content
-
-    if "</think>" in responseContent:
-        responseContent = responseContent.split("</think>")[-1].strip()
 
     return jsonify(responseContent)
 
@@ -73,4 +73,5 @@ def get_response():
 def clear_chat_session():
     """An optional endpoint to clear the conversation history."""
     session.pop("conversation_id", None)
+    session.pop("resume", None)
     return jsonify({"status": "session cleared"})
