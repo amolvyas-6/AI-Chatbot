@@ -6,6 +6,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
 import os
 from dotenv import load_dotenv 
+from langgraph.checkpoint.redis import RedisSaver
 
 load_dotenv("..")
 
@@ -23,4 +24,7 @@ graph.add_node("chatbot", chatbot)
 graph.add_edge(START, "chatbot")
 graph.add_edge("chatbot", END)
 
-agent = graph.compile()
+with RedisSaver.from_conn_string(os.getenv("REDIS_URL")) as checkpointer:
+    # Initialize Redis indices (only needed once)
+    checkpointer.setup()
+    agent = graph.compile(checkpointer=checkpointer)

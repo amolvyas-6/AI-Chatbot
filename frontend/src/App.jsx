@@ -8,13 +8,7 @@ import { BACKEND_ENDPOINTS } from "./config";
 export default function App() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit, reset, watch } = useForm();
   const resume = watch("resume");
   const fileName = resume?.[0]?.name;
 
