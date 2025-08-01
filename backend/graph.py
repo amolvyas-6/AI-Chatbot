@@ -1,76 +1,50 @@
 from langgraph.graph import StateGraph, START, END
 from typing import Annotated, TypedDict
 from langgraph.graph.message import add_messages
-from langchain_ollama import ChatOllama
+# from langchain_ollama import ChatOllama
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
-import os
-from dotenv import load_dotenv 
 from langgraph.checkpoint.redis import RedisSaver
-from langchain.document_loaders import PyPDFLoader
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_redis import RedisConfig, RedisVectorStore
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from dotenv import load_dotenv 
+from helper import tools 
+from langgraph.prebuilt import ToolNode, tools_condition
+import os
+load_dotenv()
 
-load_dotenv("..")
-
+### Define State to be used in the Graph
 class State(TypedDict):
     messages: Annotated[list, add_messages]
 
+### Initialize LLM
 # model = ChatOllama(model="qwen3:4b")
 model = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key = os.getenv("GEMINI_API_KEY"))
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
-config = RedisConfig(
-    index_name="resumes",
-    redis_url = os.getenv("REDIS_URL"),
-    metadata_schema=[{
-        "name": "conversation_id",
-        "type": "tag"
-    }]
-)
-vector_store = RedisVectorStore.from_documents(
-    embeddings=embeddings,
-    config=config
-)
+model = model.bind_tools(tools)
 
-def embed_resume_as_vectors(file_path, conversation_id):
-    """
-    Tool to embed user's uploaded resume to vectors so that it can further be used for semantic search.
-    This tool is always to be executed if a resume is uploaded by the user and a file path for it is also providied.
-    Do not proceed further if this tool returns failure
-
-    Input: 
-        file_path: str - this is the path of the resume file uploaded by the user
-        conversation_id: str - this is the unique converation id to be used
-    
-    Output:
-        str: return whether embedding was successful or not
-    """
-    try:
-        loader = PyPDFLoader(file_path)
-        docs = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size = 1000,
-            chunk_overlap=200,
-        )
-        chunks = text_splitter.split_documents(docs)
-        for chunk in chunks:
-            chunk.metadata["conversation_id"] = conversation_id
-
-        vector_store.add_documents(chunks)
-        return "Embedding Successful"
-    except:
-        return "Embedding Failed"
-
+### Define the define the nodes of the Graph
 def chatbot(state:State):
-    return {"messages": model.invoke(state["messages"])}
+    response = model.invoke(state["messages"])
+    return {"messages": response}
 
-graph = StateGraph(State)
-graph.add_node("chatbot", chatbot)
-graph.add_edge(START, "chatbot")
-graph.add_edge("chatbot", END)
+### Define the tool node
+tool_node = ToolNode(tools)
 
+### Build the Graph
+graph_builder = StateGraph(State)
+graph_builder.add_node("tools", tool_node)  # Add tool node
+graph_builder.add_node("chatbot", chatbot)  # Add chatbot node
+graph_builder.add_conditional_edges(    # Add conditional edge between tool and chatbot node
+    "chatbot",
+    tools_condition,
+    {
+        "tools": "tools",
+        "__end__": END
+    }
+
+)
+graph_builder.add_edge(START, "chatbot")    # Set entry point of graph as chatbot node
+graph_builder.add_edge("tools", "chatbot")  # Add edge from tools to chatbot so that chatbot can see tool output
+graph_builder.add_edge("chatbot", END)  # Set exit point as chatbot node
+
+### Connect to Redis Database to use as checkpointer for Graph
 with RedisSaver.from_conn_string(os.getenv("REDIS_URL")) as checkpointer:
-    # Initialize Redis indices (only needed once)
-    checkpointer.setup()
-    agent = graph.compile(checkpointer=checkpointer)
+    checkpointer.setup()    # Initialize Redis indices (only needed once)
+    graph = graph_builder.compile(checkpointer=checkpointer)
