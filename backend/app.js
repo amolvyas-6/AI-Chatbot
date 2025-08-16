@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import mongoose from "mongoose";
 import userRoutes from "./routes/userRoutes.js";
+import conversationRoutes from "./routes/conversationRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import cookieParser from "cookie-parser";
 
@@ -21,6 +22,7 @@ app.use(
 
 // Routes
 app.use("/user", userRoutes);
+app.use("/conversation", conversationRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);

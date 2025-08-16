@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { Message } from "./messageModel.js";
 
 const conversationSchema = new mongoose.Schema(
   {
@@ -6,6 +7,7 @@ const conversationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
     title: {
       type: String,
@@ -14,5 +16,11 @@ const conversationSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+conversationSchema.post("deleteMany", async function (doc, next) {
+  console.log(next);
+  await Message.deleteMany({ conversationId: doc._id });
+  next();
+});
 
 export const Conversation = mongoose.model("Conversation", conversationSchema);
