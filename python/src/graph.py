@@ -3,8 +3,11 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import ToolNode, tools_condition
-from helper import tools 
+from src.helper import tools 
 import os
+import dotenv
+
+dotenv.load_dotenv()
 
 ### Define State to be used in the Graph
 class State(TypedDict):
@@ -38,3 +41,5 @@ graph_builder.add_conditional_edges(    # Add conditional edge between tool and 
 graph_builder.add_edge(START, "chatbot")    # Set entry point of graph as chatbot node
 graph_builder.add_edge("tools", "chatbot")  # Add edge from tools to chatbot so that chatbot can see tool output
 graph_builder.add_edge("chatbot", END)  # Set exit point as chatbot node
+
+graph = graph_builder.compile() 

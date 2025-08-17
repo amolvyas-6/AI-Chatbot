@@ -5,6 +5,9 @@ from langchain_redis import RedisConfig, RedisVectorStore
 from redisvl.query.filter import Tag
 from langchain.tools import tool
 import os
+import dotenv
+
+dotenv.load_dotenv() 
 
 ### Initialize Embedding Model for Vector DB
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
@@ -12,7 +15,7 @@ embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-b
 ### Connect to Redis Database for Storage of Vector DB
 config = RedisConfig(
     index_name="resumes",
-    redis_url = os.getenv("REDIS_URL"),
+    redis_url =  "redis://",
     metadata_schema=[{
         "name": "conversation_id",
         "type": "tag"

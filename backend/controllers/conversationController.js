@@ -50,19 +50,20 @@ const addMessage = asyncHandler(async (req, res) => {
 
   chatHistory.reverse();
 
-  // const aiResponse = await axios.get("http://localhost:5000/api/ai", {
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  //   data: {
-  //     messages: chatHistory,
-  //   },
-  // });
+  const aiResponse = await axios.post(
+    "http://localhost:5000/chatbot",
+    { chatHistory: chatHistory },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   const aiMessage = await Message.create({
     conversationId: userMessage.conversationId,
-    role: "assistant",
-    content: "TEsting", // aiResponse.data.content,
+    role: aiResponse.data.role,
+    content: aiResponse.data.content,
   });
 
   res.send(new ApiResponse(200, aiMessage));
@@ -101,7 +102,7 @@ const deleteConversation = asyncHandler(async (req, res) => {
   if (!conversation) {
     throw new ApiError(404, "Conversation not found");
   }
-  await Conversation.deleteMany({ _id: conversationId });
+  await Conversation.findByIdAndDelete(conversationId);
   res.send(new ApiResponse(200, "Conversation deleted successfully"));
 });
 

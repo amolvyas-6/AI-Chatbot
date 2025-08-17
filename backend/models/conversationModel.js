@@ -17,8 +17,8 @@ const conversationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-conversationSchema.post("deleteMany", async function (doc, next) {
-  console.log(next);
+conversationSchema.post("findOneAndDelete", async function (doc, next) {
+  console.log(doc._id, doc);
   await Message.deleteMany({ conversationId: doc._id });
   next();
 });
