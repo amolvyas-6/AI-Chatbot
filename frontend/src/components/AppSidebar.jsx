@@ -34,7 +34,7 @@ export default function AppSidebar() {
             className="w-12 h-12 object-cover rounded-md"
           />
           <div>
-            <p className="text-lg font-semibold">AI Chatbot</p>
+            <p className="text-lg font-semibold">Generic AI</p>
             <p className="text-sm text-muted-foreground">Made By Amol Vyas</p>
           </div>
         </div>
