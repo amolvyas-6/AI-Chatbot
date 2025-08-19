@@ -1,0 +1,11 @@
+.chat-item:hover .chat-delete {
+    opacity: 1;
+}
+
+.chat-item:hover .chat-title {
+    width: 83.3333%;
+}
+
+.chat-item:hover {
+    cursor: pointer;
+}
