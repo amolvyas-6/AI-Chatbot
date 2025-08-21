@@ -24,11 +24,10 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "../hooks/useAuth.jsx";
+import LoginButton from "@/components/LoginButton.jsx";
 
 export default function AppSidebar() {
-  const { user } = useAuth();
-  console.log("User in AppSidebar:", user);
-  console.log(!user);
+  const { user, logout, chatHistory } = useAuth();
 
   return (
     <Sidebar>
@@ -55,9 +54,16 @@ export default function AppSidebar() {
         <p className="text-muted-foreground text-sm">Chat History:</p>
         {!user && (
           <p className="text-muted-foreground text-sm">
-            No chat history available
+            Login To See Chat History
           </p>
         )}
+        {user && chatHistory.length === 0 && (
+          <p className="text-muted-foreground text-sm">
+            No Chat History Available
+          </p>
+        )}
+        {chatHistory.length > 0 &&
+          chatHistory.map((chat) => <Chat key={chat._id} title={chat.title} />)}
       </SidebarContent>
       {user ? (
         <SidebarFooter className="px-8 py-4 border-t-2 border-t-accent">
@@ -65,13 +71,11 @@ export default function AppSidebar() {
             <div className="flex items-center">
               <Avatar className="rounded-md w-9 h-9 ">
                 <AvatarImage className="object-cover" src={user.avatar} />
-                <AvatarFallback>
-                  {user.fullName[0] + user.fullName[1]}
-                </AvatarFallback>
+                <AvatarFallback>{user.username[0]}</AvatarFallback>
               </Avatar>
               <div className="ml-4 font-medium text-sm">
                 <p>{user.username}</p>
-                <p className="text-muted-foreground">{user.email}</p>
+                <p className="text-muted-foreground truncate">{user.email}</p>
               </div>
             </div>
             <Popover>
@@ -88,7 +92,10 @@ export default function AppSidebar() {
                     <ArrowRightIcon />
                   </Button>
                 </div>
-                <div className="flex items-center hover:bg-accent p-2 hover:cursor-pointer rounded-md">
+                <div
+                  className="flex items-center hover:bg-accent p-2 hover:cursor-pointer rounded-md"
+                  onClick={logout}
+                >
                   <div className="flex justify-between">
                     <LogOut className="text-red-500" />
                     <p className="text-sm mx-4">Logout</p>
@@ -103,7 +110,7 @@ export default function AppSidebar() {
         </SidebarFooter>
       ) : (
         <SidebarFooter className="px-4 py-4 border-t-2 border-t-accent">
-          <Button variant="default">Log In</Button>
+          <LoginButton />
         </SidebarFooter>
       )}
     </Sidebar>

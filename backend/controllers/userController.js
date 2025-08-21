@@ -86,7 +86,7 @@ const loginUser = asyncHandler(async (req, res) => {
   res
     .cookie("refreshToken", refreshToken, cookieOptions)
     .cookie("accessToken", accessToken, cookieOptions)
-    .json(new ApiResponse(200, {}, "User logged in successfully"));
+    .json(new ApiResponse(200, user, "User logged in successfully"));
 });
 
 // Logout User
@@ -131,4 +131,9 @@ const renewTokens = asyncHandler(async (req, res) => {
     .send(new ApiResponse(200, {}, "Access Token Renewed Successfully"));
 });
 
-export { registerUser, loginUser, logoutUser, renewTokens };
+const getLoggedInUser = asyncHandler(async (req, res) => {
+  const user = req.user;
+  res.send(new ApiResponse(200, user, "User fetched successfully"));
+});
+
+export { registerUser, loginUser, logoutUser, renewTokens, getLoggedInUser };

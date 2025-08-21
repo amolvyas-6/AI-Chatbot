@@ -71,9 +71,11 @@ const addMessage = asyncHandler(async (req, res) => {
 
 const getAllConversations = asyncHandler(async (req, res) => {
   const userId = req.user._id;
-  const conversations = await Conversation.find({ userId }).sort({
-    createdAt: -1,
-  });
+  const conversations = await Conversation.find({ userId })
+    .sort({
+      createdAt: -1,
+    })
+    .select("-userId -createdAt -updatedAt -__v");
   console.log(conversations);
   res.send(new ApiResponse(200, conversations));
 });
