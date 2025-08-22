@@ -2,7 +2,6 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginForm() {
@@ -14,6 +13,7 @@ export default function LoginForm() {
 
   const { login } = useAuth();
 
+  // function to run on form submit
   const onLogin = async (data) => {
     login(data);
   };

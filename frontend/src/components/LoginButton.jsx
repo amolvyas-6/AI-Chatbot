@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Dialog,
   DialogTrigger,
@@ -35,6 +34,9 @@ export default function LoginButton() {
           </TabsContent>
           <TabsContent value="register">
             <RegisterForm />
+          </TabsContent>
+          <TabsContent value="oauth">
+            <p>Coming Soon :)</p>
           </TabsContent>
         </Tabs>
       </DialogContent>

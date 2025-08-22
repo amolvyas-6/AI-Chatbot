@@ -13,16 +13,23 @@ export default function RegisterForm() {
 
   const { register: registerUser } = useAuth();
 
+  // Function to run when the form is submitted
   const onRegister = async (data) => {
-    const formData = new FormData();
-    formData.append("username", data.username);
-    formData.append("email", data.email);
-    formData.append("password", data.password);
-    // Append the file. data.avatar will be a FileList, so take the first file.
-    if (data.avatar && data.avatar[0]) {
-      formData.append("avatar", data.avatar[0]);
+    try {
+      const formData = new FormData();
+      formData.append("username", data.username);
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+      // Append the file. data.avatar will be a FileList, so take the first file.
+      if (data.avatar && data.avatar[0]) {
+        formData.append("avatar", data.avatar[0]);
+      }
+      await registerUser(formData);
+      console.log("Registration successful");
+    } catch (error) {
+      console.error("Registration failed:", error);
+      alert(error.response?.data?.message || "Registration Failed");
     }
-    await registerUser(formData);
   };
 
   return (

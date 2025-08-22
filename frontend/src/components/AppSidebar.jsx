@@ -37,15 +37,16 @@ export default function AppSidebar() {
     setCurrentChat,
   } = useAuth();
 
-  const handleChatClick = (chatId) => {
-    setCurrentChat(chatId);
-  };
-
   const newChat = async () => {
-    const response = await api.post("/conversation");
-    const conversation = response.data.data;
-    setChatHistory((prev) => [conversation, ...prev]);
-    setCurrentChat(conversation._id);
+    try {
+      const response = await api.post("/conversation");
+      const conversation = response.data.data;
+      setChatHistory((prev) => [conversation, ...prev]);
+      setCurrentChat(conversation._id);
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+      alert("Failed to create new chat: " + error.response?.data?.message);
+    }
   };
 
   return (
@@ -93,7 +94,6 @@ export default function AppSidebar() {
               title={chat.title}
               chatId={chat._id}
               isSelected={currentChat === chat._id}
-              onClick={() => handleChatClick(chat._id)}
             />
           ))}
       </SidebarContent>

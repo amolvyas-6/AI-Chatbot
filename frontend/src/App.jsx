@@ -5,14 +5,14 @@ import AppSidebar from "./components/AppSidebar.jsx";
 import { useAuth } from "./hooks/useAuth.jsx";
 
 function App() {
-  const { user } = useAuth();
+  const { currentChat } = useAuth();
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarTrigger />
-      <div className="flex flex-col w-full h-screen">
+      <div className="flex flex-col w-full h-screen py-4">
         <ChatArea />
-        {user && <UserInput />}
+        {currentChat && <UserInput />}
       </div>
     </SidebarProvider>
   );
