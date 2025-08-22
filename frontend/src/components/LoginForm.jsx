@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function LoginForm({ onLoginSuccess }) {
+export default function LoginForm() {
   const {
     register,
     handleSubmit,

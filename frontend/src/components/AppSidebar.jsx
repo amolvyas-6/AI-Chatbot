@@ -25,9 +25,28 @@ import {
 
 import { useAuth } from "../hooks/useAuth.jsx";
 import LoginButton from "@/components/LoginButton.jsx";
+import api from "@/lib/api.js";
 
 export default function AppSidebar() {
-  const { user, logout, chatHistory } = useAuth();
+  const {
+    user,
+    logout,
+    chatHistory,
+    setChatHistory,
+    currentChat,
+    setCurrentChat,
+  } = useAuth();
+
+  const handleChatClick = (chatId) => {
+    setCurrentChat(chatId);
+  };
+
+  const newChat = async () => {
+    const response = await api.post("/conversation");
+    const conversation = response.data.data;
+    setChatHistory((prev) => [conversation, ...prev]);
+    setCurrentChat(conversation._id);
+  };
 
   return (
     <Sidebar>
@@ -44,7 +63,12 @@ export default function AppSidebar() {
           </div>
         </div>
         <div>
-          <Button variant="outline" className="w-full mt-4" disabled={!user}>
+          <Button
+            variant="outline"
+            className="w-full mt-4"
+            disabled={!user}
+            onClick={newChat}
+          >
             <PlusIcon className="w-4 h-4" />
             <span>New Chat</span>
           </Button>
@@ -63,17 +87,25 @@ export default function AppSidebar() {
           </p>
         )}
         {chatHistory.length > 0 &&
-          chatHistory.map((chat) => <Chat key={chat._id} title={chat.title} />)}
+          chatHistory.map((chat) => (
+            <Chat
+              key={chat._id}
+              title={chat.title}
+              chatId={chat._id}
+              isSelected={currentChat === chat._id}
+              onClick={() => handleChatClick(chat._id)}
+            />
+          ))}
       </SidebarContent>
       {user ? (
         <SidebarFooter className="px-8 py-4 border-t-2 border-t-accent">
           <div className="flex justify-between">
-            <div className="flex items-center">
+            <div className="flex items-center min-w-0">
               <Avatar className="rounded-md w-9 h-9 ">
                 <AvatarImage className="object-cover" src={user.avatar} />
                 <AvatarFallback>{user.username[0]}</AvatarFallback>
               </Avatar>
-              <div className="ml-4 font-medium text-sm">
+              <div className="ml-4 font-medium text-sm min-w-0">
                 <p>{user.username}</p>
                 <p className="text-muted-foreground truncate">{user.email}</p>
               </div>

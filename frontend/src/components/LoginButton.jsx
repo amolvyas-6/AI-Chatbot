@@ -13,14 +13,8 @@ import LoginForm from "@/components/LoginForm.jsx";
 import RegisterForm from "@/components/RegisterForm";
 
 export default function LoginButton() {
-  const [open, setOpen] = useState(false);
-
-  const handleLoginSuccess = () => {
-    setOpen(false);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog>
       <DialogTrigger asChild>
         <Button variant={"default"} className="w-full">
           Log In
@@ -37,7 +31,7 @@ export default function LoginButton() {
             </TabsList>
           </div>
           <TabsContent value="login">
-            <LoginForm onLoginSuccess={handleLoginSuccess} />
+            <LoginForm />
           </TabsContent>
           <TabsContent value="register">
             <RegisterForm />

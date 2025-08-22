@@ -2,6 +2,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Send, Paperclip } from "lucide-react";
 import React from "react";
+import { useAuth } from "@/hooks/useAuth";
+import api from "@/lib/api";
 
 export default function UserInput() {
   const textareaRef = React.useRef(null);
@@ -25,6 +27,29 @@ export default function UserInput() {
     }
   };
 
+  const { currentChat, setMessages } = useAuth();
+  const handleSendMessage = async () => {
+    const textarea = textareaRef.current;
+    if (textarea && textarea.value.trim()) {
+      const newMessage = {
+        role: "user",
+        content: textarea.value.trim(),
+      };
+      textarea.value = "";
+      setMessages((prev) => [...prev, newMessage]);
+      const response = await api.post(
+        `/conversation/${currentChat}`,
+        newMessage
+      );
+      const aiResponse = {
+        role: response.data.data.role,
+        content: response.data.data.content,
+      };
+      setMessages((prev) => [...prev, aiResponse]);
+      handleInput();
+    }
+  };
+
   return (
     <div className="flex items-end mr-8 my-4 h-min-[5rem]">
       <Textarea
@@ -37,7 +62,12 @@ export default function UserInput() {
       <Button className="ml-2" size="icon" variant="ghost">
         <Paperclip className="w-5 h-5" />
       </Button>
-      <Button className="ml-2" size="icon" variant="ghost">
+      <Button
+        className="ml-2"
+        size="icon"
+        variant="ghost"
+        onClick={handleSendMessage}
+      >
         <Send className="w-5 h-5" />
       </Button>
     </div>

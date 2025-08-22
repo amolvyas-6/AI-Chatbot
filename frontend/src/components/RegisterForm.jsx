@@ -2,13 +2,28 @@ import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
-export default function RegisterForm({ onRegister }) {
+export default function RegisterForm() {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
+
+  const { register: registerUser } = useAuth();
+
+  const onRegister = async (data) => {
+    const formData = new FormData();
+    formData.append("username", data.username);
+    formData.append("email", data.email);
+    formData.append("password", data.password);
+    // Append the file. data.avatar will be a FileList, so take the first file.
+    if (data.avatar && data.avatar[0]) {
+      formData.append("avatar", data.avatar[0]);
+    }
+    await registerUser(formData);
+  };
 
   return (
     <form onSubmit={handleSubmit(onRegister)} className="space-y-4">

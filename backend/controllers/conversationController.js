@@ -16,13 +16,16 @@ const newConversation = asyncHandler(async (req, res) => {
     title,
   });
 
-  res.send(new ApiResponse(200, conversation));
+  const createdConversation = await Conversation.findById(
+    conversation._id
+  ).select("-userId -createdAt -updatedAt -__v");
+
+  res.send(new ApiResponse(200, createdConversation));
 });
 
 const addMessage = asyncHandler(async (req, res) => {
   const conversationId = req.params.conversationId;
   const { content, role } = req.body;
-
   if (!conversationId) {
     throw new ApiError(400, "Conversation ID is required");
   }

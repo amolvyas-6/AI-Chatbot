@@ -1,6 +1,5 @@
-import { useState, createContext, useEffect, use } from "react";
+import { createContext, useEffect, useState } from "react";
 import api from "@/lib/api.js";
-import { set } from "react-hook-form";
 
 export const AuthContext = createContext();
 
@@ -8,12 +7,13 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState();
   const [loading, setLoading] = useState(true);
   const [chatHistory, setChatHistory] = useState([]);
+  const [currentChat, setCurrentChat] = useState(null);
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await api.get("/user/logged-in");
-        console.log(response.data);
         setUser(response.data.data);
       } catch (err) {
         setUser(null);
@@ -22,14 +22,14 @@ export const AuthProvider = ({ children }) => {
     const getChatHistory = async () => {
       try {
         const response = await api.get("/conversation");
-        console.log(response.data);
-        setChatHistory(response.data.data);
+        setChatHistory(response.data.data || []);
       } catch (err) {
         setChatHistory([]);
       }
     };
     fetchUser();
     getChatHistory();
+    setLoading(false);
   }, []);
 
   const login = async (userData) => {
@@ -55,6 +55,8 @@ export const AuthProvider = ({ children }) => {
       const response = await api.get("/user/logout");
       setUser(null);
       setChatHistory([]);
+      setCurrentChat(null);
+      setMessages([]);
       alert("Logout Successful");
     } catch (err) {
       console.error("Logout failed:", err);
@@ -62,8 +64,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const register = async (userData) => {
+    try {
+      const response = await api.post("/user/register", userData);
+      alert("Registration Successful. Please Login.");
+    } catch (err) {
+      console.error("Registration failed:", err);
+      alert(err.response?.data?.message || "Registration Failed");
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, chatHistory }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        loading,
+        chatHistory,
+        setChatHistory,
+        currentChat,
+        setCurrentChat,
+        messages,
+        setMessages,
+        register,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
