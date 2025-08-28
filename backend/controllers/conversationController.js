@@ -54,7 +54,7 @@ const addMessage = asyncHandler(async (req, res) => {
   chatHistory.reverse();
 
   const aiResponse = await axios.post(
-    "http://localhost:5000/chatbot",
+    `${process.env.PYTHON_BASE_URL}/chatbot`,
     { chatHistory: chatHistory },
     {
       headers: {
